@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Bisnis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: white;
+  }
+  .header {
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .header-title { font-weight: 700; font-size: 18px; }
+  .header-sub { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 2px; }
+  .tabs {
+    display: flex;
+    background: rgba(0,0,0,0.2);
+    margin: 14px;
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    background: transparent;
+    color: rgba(255,255,255,0.45);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  .content { padding: 4px 14px 32px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .panel-title { font-weight: 700; font-size: 19px; margin-bottom: 4px; }
+  .panel-sub { color: rgba(255,255,255,0.45); font-size: 13px; margin-bottom: 18px; }
+  label {
+    display: block;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+    color: white;
+    font-size: 14px;
+    font-family: inherit;
+    margin-bottom: 12px;
+    outline: none;
+    resize: vertical;
+    line-height: 1.6;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(102,126,234,0.4);
+  }
+  .btn:disabled {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .btn-green {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    box-shadow: 0 4px 20px rgba(56,239,125,0.3);
+  }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transition: all 0.2s;
+  }
+  .chip.active { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .result-box {
+    margin-top: 14px;
+    border: 1px solid rgba(102,126,234,0.4);
+    border-radius: 16px;
+    overflow: hidden;
+    display: none;
+  }
+  .result-box.show { display: block; }
+  .result-header {
+    background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .result-text {
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.85);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .result-footer { padding: 0 16px 14px; }
+  .tip-box {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(255,200,0,0.08);
+    border: 1px solid rgba(255,200,0,0.25);
+    border-radius: 12px;
+    color: rgba(255,220,100,0.85);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🤖</div>
+  <div>
+    <div class="header-title">AI Agent Bisnis</div>
+    <div class="header-sub" id="headerSub">Setup bisnis kamu dulu di ⚙️</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('responder',this)">💬 Balas Klien</button>
+  <button class="tab-btn" onclick="switchTab('content',this)">✍️ Buat Konten</button>
+  <button class="tab-btn" onclick="switchTab('setup',this)">⚙️ Bisnis Saya</button>
+</div>
+
+<div class="content">
+
+  <div id="tab-responder" class="tab-panel active">
+    <div class="panel-title">💬 Balas Pesan Klien</div>
+    <div class="panel-sub">Paste pesan klien → AI buatkan balasan siap kirim</div>
+    <label>Pesan dari klien / pembeli:</label>
+    <textarea id="clientMsg" rows="4" placeholder='Contoh:&#10;"Kak mau tanya, bikin logo berapa ya?"'></textarea>
+    <button class="btn" id="btnResponder" onclick="handleResponder()">🚀 Generate Balasan</button>
+    <div class="result-box" id="resultResponder">
+      <div class="result-header">✅ Balasan Siap Kirim</div>
+      <div class="result-text" id="textResponder"></div>
+      <div class="result-footer">
+        <button class="btn btn-green" style="margin-bottom:0" onclick="copyText('textResponder','btnCopyResp')" id="btnCopyResp">📋 Copy Teks</button>
+      </div>
+    </div>
+    <div class="tip-box" id="tipBox">
+      💡 <strong>Tips:</strong> Isi data bisnis di tab ⚙️ agar AI jawab sesuai harga & layananmu!
+    </div>
+  </div>
+
+  <div id="tab-content" class="tab-panel">
+    <div class="panel-title">✍️ Buat Konten</div>
+    <div class="panel-sub">Pilih jenis → deskripsikan → AI tulis teksnya</div>
+    <label>Jenis konten:</label>
+    <div class="chip-group">
+      <button class="chip active" onclick="selectChip(this,'caption_ig')">📸 Caption IG</button>
+      <button class="chip" onclick="selectChip(this,'caption_toko')">🛒 Deskripsi Toko</button>
+      <button class="chip" onclick="selectChip(this,'wa_promo')">📱 Broadcast WA</button>
+      <button class="chip" onclick="selectChip(this,'follow_up')">🔔 Follow Up</button>
+      <button class="chip" onclick="selectChip(this,'penawaran')">💼 Penawaran</button>
+    </div>
+    <label>Jelaskan produk/jasa yang mau dipromosikan:</label>
+    <textarea id="contentDesc" rows="4" placeholder='Contoh:&#10;"Template Shopee premium, harga 99rb, 10 variasi warna"'></textarea>
+    <button class="btn" id="btnContent" onclick="handleContent()">✨ Generate Konten</button>
+    <div class="result-box" id="resultContent">
+      <div class="result-header">✅ Konten Siap Pakai</div>
+      <div class="result-text" id="textContent"></div>
+      <div class="result-footer">
+        <button class="btn btn-green" style="margin-bottom:0" onclick="copyText('textContent','btnCopyContent')" id="btnCopyContent">📋 Copy Teks</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-setup" class="tab-panel">
+    <div class="panel-title">⚙️ Data Bisnis Saya</div>
+    <div class="panel-sub">Isi sekali, AI akan ingat info bisnismu</div>
+    <label>Nama kamu / nama bisnis:</label>
+    <input type="text" id="pName" placeholder="Contoh: Rayhan / RayhanDesign">
+    <label>Layanan freelance (dan harganya):</label>
+    <textarea id="pServices" rows="3" placeholder="Contoh:&#10;- Desain logo mulai Rp 300rb&#10;- Website mulai Rp 1.5jt"></textarea>
+    <label>Produk digital yang dijual:</label>
+    <textarea id="pProducts" rows="3" placeholder="Contoh:&#10;- Template Shopee Premium Rp 99rb&#10;- Preset Lightroom Rp 49rb"></textarea>
+    <label>Ketentuan & cara bayar:</label>
+    <textarea id="pPrices" rows="2" placeholder="Contoh:&#10;DP 50% di awal. Bayar via BCA, Dana, GoPay."></textarea>
+    <label>FAQ / info sering ditanyakan:</label>
+    <textarea id="pFaqs" rows="3" placeholder="Contoh:&#10;- Pengerjaan 7-14 hari&#10;- Revisi 2x gratis"></textarea>
+    <button class="btn" id="btnSave" onclick="saveProfile()">💾 Simpan Data Bisnis</button>
+  </div>
+
+</div>
+
+<script>
+  let selectedContentType = 'caption_ig';
+  let profile = { name:'', services:'', products:'', prices:'', faqs:'' };
+
+  function switchTab(tabId, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function selectChip(el, type) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    selectedContentType = type;
+  }
+
+  function saveProfile() {
+    profile.name = document.getElementById('pName').value;
+    profile.services = document.getElementById('pServices').value;
+    profile.products = document.getElementById('pProducts').value;
+    profile.prices = document.getElementById('pPrices').value;
+    profile.faqs = document.getElementById('pFaqs').value;
+    const btn = document.getElementById('btnSave');
+    btn.textContent = '✅ Tersimpan!';
+    if (profile.name) {
+      document.getElementById('headerSub').textContent = 'Halo, ' + profile.name + '! 👋';
+      document.getElementById('tipBox').style.display = 'none';
+    }
+    setTimeout(() => {
+      btn.textContent = '💾 Simpan Data Bisnis';
+      switchTab('responder', document.querySelectorAll('.tab-btn')[0]);
+    }, 1500);
+  }
+
+  function getContext() {
+    return `Nama: ${profile.name||'belum diset'}\nLayanan: ${profile.services||'belum diset'}\nProduk: ${profile.products||'belum diset'}\nHarga: ${profile.prices||'belum diset'}\nFAQ: ${profile.faqs||'belum diset'}`;
+  }
+
+  async function callClaude(prompt) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || 'Terjadi error.';
+  }
+
+  async function handleResponder() {
+    const msg = document.getElementById('clientMsg').value.trim();
+    if (!msg) return;
+    const btn = document.getElementById('btnResponder');
+    btn.disabled = true;
+    btn.textContent = '🤔 AI sedang mikir...';
+    document.getElementById('resultResponder').classList.remove('show');
+    try {
+      const result = await callClaude(`Kamu asisten AI untuk bisnis ini:\n${getContext()}\n\nBalas pesan klien berikut dengan sopan dan natural dalam Bahasa Indonesia, maksimal 5-6 kalimat:\n"${msg}"\n\nTulis balasan saja.`);
+      document.getElementById('textResponder').textContent = result;
+      document.getElementById('resultResponder').classList.add('show');
+    } catch(e) {
+      document.getElementById('textResponder').textContent = '❌ Error. Coba lagi.';
+      document.getElementById('resultResponder').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.textContent = '🚀 Generate Balasan';
+  }
+
+  async function handleContent() {
+    const desc = document.getElementById('contentDesc').value.trim();
+    if (!desc) return;
+    const btn = document.getElementById('btnContent');
+    btn.disabled = true;
+    btn.textContent = '✍️ AI sedang nulis...';
+    document.getElementById('resultContent').classList.remove('show');
+    const labels = {
+      caption_ig:'caption Instagram dengan emoji dan hashtag',
+      caption_toko:'deskripsi produk Tokopedia/Shopee yang persuasif',
+      wa_promo:'pesan broadcast WhatsApp promosi yang singkat',
+      follow_up:'pesan follow up ke klien yang sopan',
+      penawaran:'pesan penawaran jasa yang profesional'
+    };
+    try {
+      const result = await callClaude(`Kamu copywriter untuk bisnis ini:\n${getContext()}\n\nBuatkan ${labels[selectedContentType]} untuk:\n"${desc}"\n\nTulis langsung kontennya.`);
+      document.getElementById('textContent').textContent = result;
+      document.getElementById('resultContent').classList.add('show');
+    } catch(e) {
+      document.getElementById('textContent').textContent = '❌ Error. Coba lagi.';
+      document.getElementById('resultContent').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.textContent = '✨ Generate Konten';
+  }
+
+  function copyText(textElId, btnId) {
+    const text = document.getElementById(textElId).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById(btnId);
+      btn.textContent = '✅ Berhasil Dicopy!';
+      setTimeout(() => { btn.textContent = '📋 Copy Teks'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
